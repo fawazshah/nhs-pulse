@@ -131,7 +131,7 @@ else:
         margin=dict(l=50, r=200, t=30, b=50),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 # ---------------------------------------------------------------------------
 # League table grid
@@ -161,4 +161,4 @@ styled = (
     .format({c: "{:.0f}" for c in display_df.columns if "Rank" in c}, na_rep="—")
 )
 
-st.dataframe(styled, use_container_width=True, height=500)
+st.dataframe(styled, width='stretch', height=700)

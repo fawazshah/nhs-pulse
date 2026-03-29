@@ -8,3 +8,8 @@ dependencies = [
     "plotly>=6.6.0",
     "streamlit>=1.55.0",
 ]
+
+[dependency-groups]
+dev = [
+    "watchdog>=6.0.0",
+]

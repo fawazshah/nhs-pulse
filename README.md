@@ -3,7 +3,7 @@
 See trends in your hospital trust league table rankings.
 
 <p align="center">
-  <img src="/assets/screenshot.png" width="400">
+  <img src="/assets/screenshot.png" width="700">
 </p>
 
 

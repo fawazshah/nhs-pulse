@@ -22,9 +22,10 @@ def get_average_metric_scores(df: pd.DataFrame) -> pd.DataFrame:
     )
     cols = ["Quarter", "Region", "Trust_code", "Trust_name", "Value", "Rank"]
     scores = df.loc[mask, cols].copy()
-    scores["Value"] = pd.to_numeric(scores["Value"], errors="coerce")
+    scores["Score"] = pd.to_numeric(scores["Value"], errors="coerce")
+    scores.drop(columns=["Value"])
     scores["Rank"] = pd.to_numeric(scores["Rank"], errors="coerce")
-    return scores.dropna(subset=["Value"]).reset_index(drop=True)
+    return scores
 
 
 def get_trend_table(scores: pd.DataFrame) -> pd.DataFrame:
@@ -43,7 +44,7 @@ def get_trend_table(scores: pd.DataFrame) -> pd.DataFrame:
     score_pivot = scores.pivot_table(
         index="Trust_name",
         columns="Quarter",
-        values="Value",
+        values="Score",
         aggfunc="mean",
     )
 

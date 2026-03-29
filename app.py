@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 from backend import build_dataset
 
-st.set_page_config(page_title="NHS Trust League Table", layout="wide")
+st.set_page_config(page_title="NHS Pulse", layout="wide")
 
 # ---------------------------------------------------------------------------
 # Data
@@ -22,8 +22,12 @@ quarters = data["quarters"]
 # Header
 # ---------------------------------------------------------------------------
 
-st.title("NHS Pulse")
-st.caption("Average metric score rankings · Q1–Q3 2025/26 · Acute trusts")
+st.markdown("<h1 style='text-align:center'>NHS Pulse</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>Average metric score rankings · Q1–Q3 2025/26 · Acute trusts</p>"
+    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>NHS quarters follow the April–March financial year: Q1 = Apr–Jun, Q2 = Jul–Sep, Q3 = Oct–Dec.</p>",
+    unsafe_allow_html=True,
+)
 
 # ---------------------------------------------------------------------------
 # Trust selector + ranking comparison
@@ -103,7 +107,7 @@ else:
                 "Score: %{customdata:.2f}"
                 "<extra></extra>"
             ),
-            customdata=trust_df["Value"],
+            customdata=trust_df["Score"],
         ))
 
     fig.update_layout(

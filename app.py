@@ -24,8 +24,7 @@ quarters = data["quarters"]
 
 st.markdown("<h1 style='text-align:center'>NHS Pulse</h1>", unsafe_allow_html=True)
 st.markdown(
-    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>Average metric score rankings for acute trusts.</p>"
-    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>NHS quarters follow the April–March financial year: Q1 = Apr–Jun, Q2 = Jul–Sep, Q3 = Oct–Dec, Q4 = Jan-Mar.</p>",
+    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>Compare rankings across NHS trusts providing acute care. Find the trust for your local hospital <a href='https://www.nhs.uk/service-search/hospital' target='_blank'>here</a>.</p>",
     unsafe_allow_html=True,
 )
 
@@ -145,6 +144,7 @@ for q in quarters:
     display_cols[f"{q} Rank"] = f"{q} Rank"
 
 display_df = trend_table[list(display_cols.keys())].rename(columns=display_cols)
+display_df.index = range(1, len(display_df) + 1)
 
 score_cols = [c for c in display_df.columns if "Score" in c]
 display_df[score_cols] = display_df[score_cols].round(2)

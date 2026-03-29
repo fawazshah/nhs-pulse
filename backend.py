@@ -3,10 +3,23 @@ import pandas as pd
 DATA_URL = "https://www.england.nhs.uk/wp-content/uploads/2026/03/nhs-oversight-framework-acute-trust-data-q3-25-26.csv"
 
 
+_Q_MONTHS = {1: ("Apr", "Jun"), 2: ("Jul", "Sep"), 3: ("Oct", "Dec"), 4: ("Jan", "Mar")}
+
+
 def _sort_key(quarter: str) -> tuple:
     """Parse 'Q3 2025/26' → (2025, 3) for chronological sorting."""
     q, year = quarter.split()
     return (int(year.split("/")[0]), int(q[1:]))
+
+
+def _format_quarter(quarter: str) -> str:
+    """Convert 'Q3 2025/26' → 'Oct-Dec 2025', 'Q4 2025/26' → 'Jan-Mar 2026'."""
+    q, year = quarter.split()
+    qnum = int(q[1:])
+    start_year = int(year.split("/")[0])
+    display_year = start_year + 1 if qnum == 4 else start_year
+    start_month, end_month = _Q_MONTHS[qnum]
+    return f"{start_month}-{end_month} {display_year}"
 
 
 def load_raw_data() -> pd.DataFrame:
@@ -99,6 +112,8 @@ def build_dataset() -> dict:
     raw = load_raw_data()
     scores = get_average_metric_scores(raw)
     quarters = get_sorted_quarters(scores)
+    scores["Quarter"] = scores["Quarter"].map(_format_quarter)
+    quarters = [_format_quarter(q) for q in quarters]
     trend_table = get_trend_table(scores, quarters)
     all_trusts = get_all_trusts(scores)
 

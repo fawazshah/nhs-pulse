@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 from backend import build_dataset
 
-st.set_page_config(page_title="NHS Pulse", layout="wide")
+st.set_page_config(page_title="NHS Pulse", page_icon="assets/favicon.png", layout="wide")
 
 # ---------------------------------------------------------------------------
 # Data

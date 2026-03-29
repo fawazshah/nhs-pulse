@@ -2,7 +2,11 @@ import pandas as pd
 
 DATA_URL = "https://www.england.nhs.uk/wp-content/uploads/2026/03/nhs-oversight-framework-acute-trust-data-q3-25-26.csv"
 
-QUARTERS = ["Q1 2025/26", "Q2 2025/26", "Q3 2025/26"]
+
+def _sort_key(quarter: str) -> tuple:
+    """Parse 'Q3 2025/26' → (2025, 3) for chronological sorting."""
+    q, year = quarter.split()
+    return (int(year.split("/")[0]), int(q[1:]))
 
 
 def load_raw_data() -> pd.DataFrame:
@@ -12,23 +16,25 @@ def load_raw_data() -> pd.DataFrame:
 
 def get_average_metric_scores(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Filter to 'Average metric score' rows for Q1-Q3 2025/26.
+    Filter to 'Average metric score' rows. Includes all quarters present in the file.
 
-    Returns columns: Quarter, Region, Trust_code, Trust_name, Value, Rank
+    Returns columns: Quarter, Region, Trust_code, Trust_name, Score, Rank
     """
-    mask = (
-        (df["Metric_description"] == "Average metric score")
-        & (df["Quarter"].isin(QUARTERS))
-    )
+    mask = df["Metric_description"] == "Average metric score"
     cols = ["Quarter", "Region", "Trust_code", "Trust_name", "Value", "Rank"]
     scores = df.loc[mask, cols].copy()
     scores["Score"] = pd.to_numeric(scores["Value"], errors="coerce")
-    scores.drop(columns=["Value"])
+    scores = scores.drop(columns=["Value"])
     scores["Rank"] = pd.to_numeric(scores["Rank"], errors="coerce")
     return scores
 
 
-def get_trend_table(scores: pd.DataFrame) -> pd.DataFrame:
+def get_sorted_quarters(scores: pd.DataFrame) -> list[str]:
+    """Return quarters present in the data, sorted chronologically."""
+    return sorted(scores["Quarter"].unique(), key=_sort_key)
+
+
+def get_trend_table(scores: pd.DataFrame, quarters: list[str]) -> pd.DataFrame:
     """
     Pivot to wide format for the league table grid.
 
@@ -54,23 +60,20 @@ def get_trend_table(scores: pd.DataFrame) -> pd.DataFrame:
     pivot = rank_pivot.join(score_pivot).reset_index()
     pivot.columns.name = None
 
-    # Interleave Score + Rank columns per quarter
-    full_cols = [col for q in QUARTERS for col in (f"{q} Score", f"{q} Rank")]
-
-    # Sort by most recent quarter rank
-    sort_cols = [f"{q} Rank" for q in reversed(QUARTERS) if f"{q} Rank" in pivot.columns]
+    quarter_cols = [col for q in quarters for col in (f"{q} Score", f"{q} Rank")]
+    sort_cols = [f"{q} Rank" for q in reversed(quarters) if f"{q} Rank" in pivot.columns]
     pivot = pivot.sort_values(sort_cols, na_position="last").reset_index(drop=True)
 
-    return pivot[["Trust_name"] + full_cols]
+    return pivot[["Trust_name"] + quarter_cols]
 
 
-def get_trust_score_trend(scores: pd.DataFrame, trust_codes: list[str]) -> pd.DataFrame:
+def get_trust_score_trend(scores: pd.DataFrame, trust_codes: list[str], quarters: list[str]) -> pd.DataFrame:
     """
     Long-format rank + score data for selected trusts, ordered for charting.
 
-    Columns: Trust_code, Trust_name, Quarter, Value, Rank
+    Columns: Trust_code, Trust_name, Quarter, Score, Rank
     """
-    quarter_order = {q: i for i, q in enumerate(QUARTERS)}
+    quarter_order = {q: i for i, q in enumerate(quarters)}
     filtered = scores[scores["Trust_code"].isin(trust_codes)].copy()
     filtered["_order"] = filtered["Quarter"].map(quarter_order)
     return (
@@ -91,13 +94,13 @@ def build_dataset() -> dict:
         - scores:       long-format Average metric score rows (with Rank)
         - trend_table:  wide pivot for grid display
         - all_trusts:   unique trust list
-        - quarters:     available quarter labels present in data
+        - quarters:     available quarter labels sorted chronologically
     """
     raw = load_raw_data()
     scores = get_average_metric_scores(raw)
-    trend_table = get_trend_table(scores)
+    quarters = get_sorted_quarters(scores)
+    trend_table = get_trend_table(scores, quarters)
     all_trusts = get_all_trusts(scores)
-    quarters = [q for q in QUARTERS if q in scores["Quarter"].unique()]
 
     return {
         "scores": scores,

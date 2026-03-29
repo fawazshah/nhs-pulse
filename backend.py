@@ -55,21 +55,13 @@ def get_trend_table(scores: pd.DataFrame) -> pd.DataFrame:
     pivot.columns.name = None
 
     # Interleave Score + Rank columns per quarter
-    quarter_cols = []
-    for q in QUARTERS:
-        score_col = f"{q} Score"
-        rank_col = f"{q} Rank"
-        if score_col not in pivot.columns:
-            pivot[score_col] = None
-        if rank_col not in pivot.columns:
-            pivot[rank_col] = None
-        quarter_cols += [score_col, rank_col]
+    full_cols = [col for q in QUARTERS for col in (f"{q} Score", f"{q} Rank")]
 
     # Sort by most recent quarter rank
     sort_cols = [f"{q} Rank" for q in reversed(QUARTERS) if f"{q} Rank" in pivot.columns]
     pivot = pivot.sort_values(sort_cols, na_position="last").reset_index(drop=True)
 
-    return pivot[["Trust_name"] + quarter_cols]
+    return pivot[["Trust_name"] + full_cols]
 
 
 def get_trust_score_trend(scores: pd.DataFrame, trust_codes: list[str]) -> pd.DataFrame:

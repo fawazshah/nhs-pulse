@@ -24,8 +24,8 @@ quarters = data["quarters"]
 
 st.markdown("<h1 style='text-align:center'>NHS Pulse</h1>", unsafe_allow_html=True)
 st.markdown(
-    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>Average metric score rankings · Q1–Q3 2025/26 · Acute trusts</p>"
-    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>NHS quarters follow the April–March financial year: Q1 = Apr–Jun, Q2 = Jul–Sep, Q3 = Oct–Dec.</p>",
+    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>Average metric score rankings for acute trusts.</p>"
+    "<p style='font-size:0.875rem; color:grey; margin:0; text-align:center'>NHS quarters follow the April–March financial year: Q1 = Apr–Jun, Q2 = Jul–Sep, Q3 = Oct–Dec, Q4 = Jan-Mar.</p>",
     unsafe_allow_html=True,
 )
 

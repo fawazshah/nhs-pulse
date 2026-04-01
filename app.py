@@ -38,6 +38,43 @@ DEFAULT_TRUSTS = [
     "The Christie NHS Foundation Trust",
 ]
 
+COLOURS = [
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+]
+
+if "colour_map" not in st.session_state:
+    # Seed defaults so the very first render already has colours.
+    defaults = [t for t in DEFAULT_TRUSTS if t in all_trusts]
+    st.session_state.colour_map = {
+        name: COLOURS[i % len(COLOURS)] for i, name in enumerate(defaults)
+    }
+
+
+def _assign_colours(names: list[str]) -> None:
+    """Ensure every name in the list has a stable colour assignment."""
+    for name in names:
+        if name not in st.session_state.colour_map:
+            idx = len(st.session_state.colour_map) % len(COLOURS)
+            st.session_state.colour_map[name] = COLOURS[idx]
+    # Drop names no longer in the list.
+    st.session_state.colour_map = {
+        k: v for k, v in st.session_state.colour_map.items() if k in names
+    }
+
+
+# Pre-inject CSS for tag positions so any new tag is immediately coloured
+# without a flash of the default red. We cover current tags plus a few extra
+# slots so the next addition already has a rule waiting.
+_n_current = len(st.session_state.colour_map)
+_n_slots = _n_current + len(COLOURS)  # enough headroom for a full cycle ahead
+tag_css = " ".join(
+    f'[data-baseweb="tag"]:nth-of-type({i + 1}) '
+    f'{{ background-color: {COLOURS[i % len(COLOURS)]} !important; }}'
+    for i in range(_n_slots)
+)
+st.markdown(f"<style>{tag_css}</style>", unsafe_allow_html=True)
+
 st.subheader("Compare trusts")
 
 selected_names = st.multiselect(
@@ -47,6 +84,9 @@ selected_names = st.multiselect(
     placeholder="Search for a trust...",
 )
 
+_assign_colours(selected_names)
+colour_map = st.session_state.colour_map
+
 selected_codes = scores.loc[
     scores["Trust_name"].isin(selected_names), "Trust_code"
 ].unique().tolist()
@@ -55,23 +95,6 @@ if not selected_names:
     st.info("Select one or more trusts above to see their rank trend.")
 else:
     trend_data = scores[scores["Trust_code"].isin(selected_codes)].copy()
-
-    COLOURS = [
-        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-        "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-    ]
-    colour_map = {
-        name: COLOURS[i % len(COLOURS)]
-        for i, name in enumerate(selected_names)
-    }
-
-    # Colour multiselect tags to match chart lines
-    tag_css = " ".join(
-        f'[data-baseweb="tag"]:nth-of-type({i + 1}) '
-        f'{{ background-color: {COLOURS[i % len(COLOURS)]} !important; }}'
-        for i in range(len(selected_names))
-    )
-    st.markdown(f"<style>{tag_css}</style>", unsafe_allow_html=True)
 
     # Y-axis ticks: every rank if range ≤ 20, otherwise multiples of 5
     visible_ranks = trend_data["Rank"].dropna()

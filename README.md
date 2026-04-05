@@ -1,12 +1,14 @@
 # NHS Pulse
 
-With NHS league tables being published for the first time in 2025, you can now see trends in how your local trust has been performing across multiple quarters. You can also view the full league table of scores and rankings per quarter.
+In 2025, the NHS started publishing league tables of all hospital trusts for the first time. With this data I've built [NHS Pulse](https://nhs-pulse.fawazshah.xyz/), where you can see the trend in how your local trust has been performing over time. You can also select a list of trusts to compare and contrast, and view the full league table.
 
 <p align="center">
   <img src="/assets/screenshot.png" width="700">
 </p>
 
-Built with Streamlit. Data taken from NHS acute trust rankings, available at https://data.england.nhs.uk/dashboard/nofacute.
+Data available from [NHS England](https://data.england.nhs.uk/dashboard/nofacute).
+
+Built with Streamlit, and deployed with [Render](https://render.com/).
 
 ## Getting started
 

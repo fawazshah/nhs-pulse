@@ -29,3 +29,9 @@ uv run backend.py
 ```
 
 This fetches the latest data and prints the available quarters, trust count, and top 10 trusts by rank.
+
+### Run backend tests
+
+```
+uv run pytest backend.py
+```

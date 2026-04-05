@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 from backend import build_dataset
+from datetime import timedelta
 
 st.set_page_config(page_title="NHS Pulse", page_icon="assets/favicon.png", layout="wide")
 
@@ -8,11 +9,16 @@ st.set_page_config(page_title="NHS Pulse", page_icon="assets/favicon.png", layou
 # Data
 # ---------------------------------------------------------------------------
 
-@st.cache_data(show_spinner="Loading NHS data...")
+@st.cache_data(show_spinner="Loading NHS data...", ttl=timedelta(weeks=1)) # cache expiry after 1 week
 def load():
     return build_dataset()
 
-data = load()
+try:
+    data = load()
+except Exception as e:
+    st.error(f"Failed to load NHS data: {e}")
+    st.stop()
+
 scores = data["scores"]
 trend_table = data["trend_table"]
 all_trusts = data["all_trusts"]

@@ -55,7 +55,7 @@ def _build_filename(q: int, fy: int) -> str:
 def _candidate_urls(q: int, fy: int) -> list[str]:
     """Generate candidate URLs for a given quarter, searching recent months.
 
-    For each month, tries versioned filenames first (v3, v2) then the base name,
+    For each month, tries versioned filename first (v2) then the base name,
     since NHS England sometimes publishes revised versions.
     """
     base = _build_filename(q, fy)
@@ -66,9 +66,7 @@ def _candidate_urls(q: int, fy: int) -> list[str]:
     for _ in range(6):
         month_path = f"{_BASE_URL}/{y}/{m:02d}"
         for v in range(2, 1, -1):
-            print(f"{month_path}/{stem}-v{v}.{ext}")
             urls.append(f"{month_path}/{stem}-v{v}.{ext}")
-        print(f"{month_path}/{base}")
         urls.append(f"{month_path}/{base}")
         m -= 1
         if m == 0:
@@ -149,22 +147,6 @@ def get_trend_table(scores: pd.DataFrame, quarters: list[str]) -> pd.DataFrame:
     pivot = pivot.sort_values(sort_cols, na_position="last").reset_index(drop=True)
 
     return pivot[["Trust_name"] + quarter_cols]
-
-
-def get_trust_score_trend(scores: pd.DataFrame, trust_codes: list[str], quarters: list[str]) -> pd.DataFrame:
-    """
-    Long-format rank + score data for selected trusts, ordered for charting.
-
-    Columns: Trust_code, Trust_name, Quarter, Score, Rank
-    """
-    quarter_order = {q: i for i, q in enumerate(quarters)}
-    filtered = scores[scores["Trust_code"].isin(trust_codes)].copy()
-    filtered["_order"] = filtered["Quarter"].map(quarter_order)
-    return (
-        filtered.sort_values(["Trust_code", "_order"])
-        .drop(columns="_order")
-        .reset_index(drop=True)
-    )
 
 
 def get_all_trusts(scores: pd.DataFrame) -> list[str]:

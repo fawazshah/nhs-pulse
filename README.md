@@ -7,3 +7,25 @@ With NHS league tables being published for the first time in 2025, you can now s
 </p>
 
 Built with Streamlit. Data taken from NHS acute trust rankings, available at https://data.england.nhs.uk/dashboard/nofacute.
+
+## Getting started
+
+### Install dependencies
+
+```bash
+uv sync
+```
+
+### Run the app
+
+```bash
+uv run streamlit run app.py
+```
+
+### Run the backend individually
+
+```bash
+uv run backend.py
+```
+
+This fetches the latest data and prints the available quarters, trust count, and top 10 trusts by rank.

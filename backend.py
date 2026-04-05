@@ -1,7 +1,9 @@
+from datetime import date
+
 import pandas as pd
+import requests
 
-DATA_URL = "https://www.england.nhs.uk/wp-content/uploads/2026/03/nhs-oversight-framework-acute-trust-data-q3-25-26.csv"
-
+_BASE_URL = "https://www.england.nhs.uk/wp-content/uploads"
 
 _Q_MONTHS = {1: ("Apr", "Jun"), 2: ("Jul", "Sep"), 3: ("Oct", "Dec"), 4: ("Jan", "Mar")}
 
@@ -22,9 +24,78 @@ def _format_quarter(quarter: str) -> str:
     return f"{start_month}-{end_month} {display_year}"
 
 
+def _last_completed_quarter(today: date) -> tuple[int, int]:
+    """Return (quarter_number, financial_year_start) for the last completed quarter."""
+    y, m = today.year, today.month
+    # Financial year starts in April. Q1=Apr-Jun, Q2=Jul-Sep, Q3=Oct-Dec, Q4=Jan-Mar
+    if m >= 10:               # Oct-Dec → Q2 (Jul-Sep) is complete
+        return 2, y
+    if m >= 7:                # Jul-Sep → Q1 (Apr-Jun) is complete
+        return 1, y
+    if m >= 4:                # Apr-Jun → Q4 (Jan-Mar) of prev FY is complete
+        return 4, y - 1
+    # Jan-Mar → Q3 (Oct-Dec) of current FY is complete
+    return 3, y - 1
+
+
+def _quarter_before(q: int, fy: int) -> tuple[int, int]:
+    """Return the quarter before (q, fy)."""
+    if q == 1:
+        return 4, fy - 1
+    return q - 1, fy
+
+
+def _build_filename(q: int, fy: int) -> str:
+    """e.g. q=3, fy=2025 → 'nhs-oversight-framework-acute-trust-data-q3-25-26.csv'"""
+    yy_start = fy % 100
+    yy_end = (fy + 1) % 100
+    return f"nhs-oversight-framework-acute-trust-data-q{q}-{yy_start:02d}-{yy_end:02d}.csv"
+
+
+def _candidate_urls(q: int, fy: int) -> list[str]:
+    """Generate candidate URLs for a given quarter, searching recent months.
+
+    For each month, tries versioned filenames first (v3, v2) then the base name,
+    since NHS England sometimes publishes revised versions.
+    """
+    base = _build_filename(q, fy)
+    stem, ext = base.rsplit(".", 1)
+    today = date.today()
+    urls = []
+    y, m = today.year, today.month
+    for _ in range(6):
+        month_path = f"{_BASE_URL}/{y}/{m:02d}"
+        for v in range(2, 1, -1):
+            print(f"{month_path}/{stem}-v{v}.{ext}")
+            urls.append(f"{month_path}/{stem}-v{v}.{ext}")
+        print(f"{month_path}/{base}")
+        urls.append(f"{month_path}/{base}")
+        m -= 1
+        if m == 0:
+            m = 12
+            y -= 1
+    return urls
+
+
+def _find_data_url() -> str:
+    """Search for the latest available CSV, trying the last completed quarter first."""
+    q, fy = _last_completed_quarter(date.today())
+    for _ in range(2):  # try two quarters
+        for url in _candidate_urls(q, fy):
+            try:
+                resp = requests.head(url, timeout=5, allow_redirects=True)
+                if resp.status_code == 200:
+                    return url
+            except requests.RequestException:
+                continue
+        q, fy = _quarter_before(q, fy)
+    raise RuntimeError("Could not find NHS oversight framework data for recent quarters")
+
+
 def load_raw_data() -> pd.DataFrame:
     """Fetch raw data from NHS England."""
-    return pd.read_csv(DATA_URL)
+    url = _find_data_url()
+    return pd.read_csv(url)
 
 
 def get_average_metric_scores(df: pd.DataFrame) -> pd.DataFrame:

@@ -247,6 +247,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "plotly" },
+    { name = "requests" },
     { name = "streamlit" },
 ]
 
@@ -259,6 +260,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "plotly", specifier = ">=6.6.0" },
+    { name = "requests", specifier = ">=2.31.0" },
     { name = "streamlit", specifier = ">=1.55.0" },
 ]
 

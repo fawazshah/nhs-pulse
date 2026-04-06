@@ -1,6 +1,6 @@
 # NHS Pulse
 
-In 2025, the NHS started publishing league tables of all hospital trusts for the first time. With this data I've built [NHS Pulse](https://nhs-pulse.fawazshah.xyz/), where you can see the trend in how your local trust has been performing over time. You can also select a list of trusts to compare and contrast, and view the full league table.
+In 2025, the NHS (National Health Service in the UK) started publishing league tables of all hospital trusts for the first time. With this data I've built [NHS Pulse](https://nhs-pulse.fawazshah.xyz/), where you can see the trend in how your local trust has been performing over time. You can also select a list of trusts to compare and contrast, and view the full league table.
 
 <p align="center">
   <img src="/assets/screenshot.png" width="700">

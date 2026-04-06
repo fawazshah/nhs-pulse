@@ -116,7 +116,7 @@ else:
 
     fig.update_layout(
         yaxis=dict(
-            title="Rank (lower = better)",
+            title="Rank",
             autorange="reversed",
             tickmode="array",
             tickvals=tick_vals,
@@ -167,3 +167,14 @@ styled = (
 )
 
 st.dataframe(styled, width='stretch', height=700)
+
+# ---------------------------------------------------------------------------
+# Footer
+# ---------------------------------------------------------------------------
+
+st.markdown(
+    "<p style='text-align:center; color:grey; font-size:0.8rem; margin-top:2rem'>"
+    "Data sourced from <a href='https://data.england.nhs.uk/dashboard/nofacute' target='_blank'>NHS England</a>."
+    "</p>",
+    unsafe_allow_html=True,
+)
